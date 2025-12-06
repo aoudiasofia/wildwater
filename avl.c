@@ -97,10 +97,11 @@ AVL* insererAVL(AVL* a, Usines u) {
             return doubleRotationGauche(a);
     }
     if (eq > 1) {
-        if (strcmp(u.identifiant, a->droit->valeur.identifiant) > 0)
+        if (strcmp(u.identifiant, a->droit->valeur.identifiant) > 0){
             return rotationGauche(a);
-        else
+        }else{
             return doubleRotationDroite(a);
+        }
     }
 
     return a;
