@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 typedef struct usines{
-    int identifiant;
+    char *identifiant;
     int capacite_max;
     int volume_capte;
     int volume_traite;
@@ -10,10 +10,26 @@ typedef struct usines{
 
 typedef struct AVL {
     Usines valeur;
-    int equilibre;     // HAUTEUR(droit) - HAUTEUR(gauche)
+    int hauteur;     // HAUTEUR(droit) - HAUTEUR(gauche)
     struct AVL *gauche;
     struct AVL *droit;
 } AVL;
 
+
+AVL* initAVL(Usines u);
+int hauteur(AVL* a);
+void mettreAJourHauteur(AVL* a);
+int facteurEquilibre(AVL* a);
+
+AVL* rotationGauche(AVL* A);
+AVL* rotationDroite(AVL* A);
+AVL* doubleRotationDroite(AVL* A);
+AVL* doubleRotationGauche(AVL* A);
+
+AVL* insererAVL(AVL* a, Usines u);
+Usines* rechercherAVL(AVL* a, char* id);
+void afficherAVL(AVL* a);
+
+void freeAVL(AVL* a);
 
 
