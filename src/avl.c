@@ -186,16 +186,17 @@ void libererAVL(NoeudAVL *racine)
         libererUsine(racine->usine);
         free(racine);
     }
+}
 
-    void parcoursInfixe(NoeudAVL * racine)
+void parcoursInfixe(NoeudAVL *racine)
+{
+    if (racine != NULL)
     {
-        if (racine != NULL)
-        {
-            parcoursInfixe(racine->gauche);
-            printf("%s : Capacité %lld - Source %.2f\n",
-                   racine->usine->id,
-                   racine->usine->capacite,
-                   racine->usine->volume_source);
-            parcoursInfixe(racine->droite);
-        }
+        parcoursInfixe(racine->gauche);
+        printf("%s : Capacité %lld - Source %.2f\n",
+               racine->usine->id,
+               racine->usine->capacite,
+               racine->usine->volume_source);
+        parcoursInfixe(racine->droite);
     }
+}
