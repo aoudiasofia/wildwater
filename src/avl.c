@@ -21,7 +21,6 @@ Usine *creerUsine(char *id, long long capacite)
     u->capacite = capacite;
     u->volume_source = 0.0;
     u->volume_traite = 0.0;
-    u->volume_source = 0.0;
 
     return u;
 }
