@@ -20,7 +20,8 @@ Usine *creerUsine(char *id, long long capacite)
 
     u->capacite = capacite;
     u->volume_source = 0.0;
-    u->volume_traité = 0.0;
+    u->volume_traite = 0.0;
+    u->volume_source = 0.0;
 
     return u;
 }
@@ -101,72 +102,48 @@ NoeudAVL *rotationGauche(NoeudAVL *x)
     return y;
 }
 
-NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajoute_volume)
+NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajoute_volume_source, double ajoute_volume_reel)
 {
-    // 1. Insertion normale d'ABR (récursive)
+    // 1. Insertion normale
     if (noeud == NULL)
     {
         Usine *nouvelleUsine = creerUsine(id, capacite);
-        // Si on insère via une ligne "Source", on a déjà un volume à ajouter
-        nouvelleUsine->volume_source = ajoute_volume;
+        nouvelleUsine->volume_source = ajoute_volume_source;
+        nouvelleUsine->volume_traite = ajoute_volume_reel;
         return creerNoeud(nouvelleUsine);
     }
 
-    // On compare les ID (ordre alphabétique) pour savoir où aller
     int compar = strcmp(id, noeud->usine->id);
 
     if (compar < 0)
-    {
-        noeud->gauche = insererNoeud(noeud->gauche, id, capacite, ajoute_volume);
-    }
+        noeud->gauche = insererNoeud(noeud->gauche, id, capacite, ajoute_volume_source, ajoute_volume_reel);
     else if (compar > 0)
-    {
-        noeud->droite = insererNoeud(noeud->droite, id, capacite, ajoute_volume);
-    }
+        noeud->droite = insererNoeud(noeud->droite, id, capacite, ajoute_volume_source, ajoute_volume_reel);
     else
     {
-        // CAS EGALITE : L'usine existe déjà ! On met à jour les données.
-        // C'est ici qu'on gère le fait que les lignes du CSV soient dans le désordre.
-
-        // Si on a reçu une capacité valide (ligne 'Usine'), on la met à jour
+        // Mise à jour existante
         if (capacite > 0)
-        {
             noeud->usine->capacite = capacite;
-        }
-        // Si on a reçu un volume (ligne 'Source' ou 'Usine->Stockage'), on l'ajoute
-        if (ajoute_volume > 0)
-        {
-            noeud->usine->volume_source += ajoute_volume;
-        }
-
-        // On retourne le noeud inchangé (structurellement)
+        if (ajoute_volume_source > 0)
+            noeud->usine->volume_source += ajoute_volume_source;
+        if (ajoute_volume_reel > 0)
+            noeud->usine->volume_traite += ajoute_volume_reel;
         return noeud;
     }
 
-    // 2. Mise à jour de la hauteur du noeud ancêtre
+    // 2. Mise à jour hauteur et 3. Equilibrage (inchangé)
     noeud->hauteur = 1 + max(hauteur(noeud->gauche), hauteur(noeud->droite));
-
-    // 3. Vérification de l'équilibre
     int balance = facteurEquilibre(noeud);
 
-    // 4. Si déséquilibré, on applique les rotations
-
-    // Cas Gauche-Gauche
     if (balance > 1 && strcmp(id, noeud->gauche->usine->id) < 0)
         return rotationDroite(noeud);
-
-    // Cas Droite-Droite
     if (balance < -1 && strcmp(id, noeud->droite->usine->id) > 0)
         return rotationGauche(noeud);
-
-    // Cas Gauche-Droite
     if (balance > 1 && strcmp(id, noeud->gauche->usine->id) > 0)
     {
         noeud->gauche = rotationGauche(noeud->gauche);
         return rotationDroite(noeud);
     }
-
-    // Cas Droite-Gauche
     if (balance < -1 && strcmp(id, noeud->droite->usine->id) < 0)
     {
         noeud->droite = rotationDroite(noeud->droite);
@@ -188,15 +165,32 @@ void libererAVL(NoeudAVL *racine)
     }
 }
 
-void parcoursInfixe(NoeudAVL *racine)
+// mode 1: max, mode 2: src, mode 3: real
+void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
 {
     if (racine != NULL)
     {
-        parcoursInfixe(racine->gauche);
-        printf("%s : Capacité %lld - Source %.2f\n",
-               racine->usine->id,
-               racine->usine->capacite,
-               racine->usine->volume_source);
-        parcoursInfixe(racine->droite);
+        // Ordre inverse : Droite -> Racine -> Gauche
+        parcoursInverse(racine->droite, flux_sortie, mode);
+
+        // Écriture selon le mode
+        // Note: Le sujet demande l'unité en M.m3 (Millions de m3) [cite: 568, 571, 576]
+        // Les données sont en m3 (ou milliers selon lecture), ajustons si nécessaire.
+        // Ici on écrit tel quel, on ajustera l'échelle dans le main ou le gnuplot.
+
+        switch (mode)
+        {
+        case 1: // max
+            fprintf(flux_sortie, "%s;%lld\n", racine->usine->id, racine->usine->capacite);
+            break;
+        case 2: // src
+            fprintf(flux_sortie, "%s;%.2f\n", racine->usine->id, racine->usine->volume_source);
+            break;
+        case 3: // real (volume traité)
+            fprintf(flux_sortie, "%s;%.2f\n", racine->usine->id, racine->usine->volume_traite);
+            break;
+        }
+
+        parcoursInverse(racine->gauche, flux_sortie, mode);
     }
 }
