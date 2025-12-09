@@ -3,131 +3,150 @@
 #include <string.h>
 #include "../headers/wildwater.h"
 
-#define TAILLE_BUFFER 4096 // Taille suffisante pour une ligne longue
+#define TAILLE_BUFFER 4096
 
-// Cette fonction est nécessaire car 'strtok' gère mal les champs vides (ex: ";;")
-// Elle copie le contenu de la colonne demandée (index commence à 1) dans 'dest'
 void recuperer_colonne(char *ligne, int index_colonne, char *dest, int taille_max)
 {
     int col_actuelle = 1;
     char *debut = ligne;
     char *fin = NULL;
-
-    // On parcourt la ligne jusqu'à trouver la bonne colonne
     while (col_actuelle < index_colonne && debut != NULL)
     {
         debut = strchr(debut, ';');
         if (debut != NULL)
         {
-            debut++; // On saute le point-virgule
+            debut++;
             col_actuelle++;
         }
     }
-
-    // Si on a trouvé le début de la colonne
     if (debut != NULL)
     {
-        // On cherche la fin (prochain point-virgule ou fin de ligne)
         fin = strchr(debut, ';');
-
         int longueur;
         if (fin != NULL)
-        {
             longueur = fin - debut;
-        }
         else
-        {
-            // C'est la dernière colonne, on va jusqu'au saut de ligne
             longueur = strcspn(debut, "\r\n");
-        }
-
-        // Sécurité pour ne pas dépasser le buffer de destination
         if (longueur >= taille_max)
             longueur = taille_max - 1;
-
-        // Copie et fermeture de la chaîne
         strncpy(dest, debut, longueur);
         dest[longueur] = '\0';
     }
     else
     {
-        // Colonne introuvable
         dest[0] = '\0';
     }
 }
 
-// Fonction principale
+int est_usine(char *str)
+{
+    if (strstr(str, "Facility") != NULL)
+        return 1;
+    if (strstr(str, "Plant") != NULL)
+        return 1;
+    if (strstr(str, "Unit") != NULL)
+        return 1;
+    if (strstr(str, "Module") != NULL)
+        return 1;
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
-    // 1. Vérification des arguments
-    if (argc != 2)
+    // Le sujet implique des arguments : fichier.dat commande [param]
+    // Exemple : ./c-wildwater data.dat histo max
+    if (argc < 4) // On attend au moins 3 arguments + le nom du prog
     {
-        fprintf(stderr, "Usage: %s <fichier_donnees.csv>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <fichier.dat> <commande> <param>\n", argv[0]);
         return 1;
     }
 
-    // 2. Ouverture du fichier
     FILE *fichier = fopen(argv[1], "r");
     if (fichier == NULL)
     {
-        fprintf(stderr, "Erreur : Impossible d'ouvrir le fichier %s\n", argv[1]);
+        fprintf(stderr, "Erreur ouverture fichier %s\n", argv[1]);
         return 2;
     }
 
-    printf("Traitement du fichier %s en cours...\n", argv[1]);
+    char *commande = argv[2];
+    char *param = argv[3];
 
-    // Initialisation de l'arbre
     NoeudAVL *racine = NULL;
     char buffer[TAILLE_BUFFER];
+    char col2[256], col3[256], col4[256], col5[256];
 
-    // Variables temporaires pour le parsing
-    char col2[256]; // Identifiant Amont
-    char col3[256]; // Identifiant Aval
-    char col4[256]; // Volume / Capacité
-
-    // 3. Lecture ligne par ligne
     while (fgets(buffer, TAILLE_BUFFER, fichier))
     {
-        // Extraction des colonnes utiles (2, 3 et 4)
         recuperer_colonne(buffer, 2, col2, 256);
         recuperer_colonne(buffer, 3, col3, 256);
         recuperer_colonne(buffer, 4, col4, 256);
+        recuperer_colonne(buffer, 5, col5, 256); // Fuites
 
-        // --- Logique de filtrage selon le sujet ---
-
-        // CAS A : Définition d'une Usine (Capacité) [cite: 78-82]
-        // La colonne 2 contient "Facility", la colonne 3 est vide ou "-"
-        if (strstr(col2, "Facility") != NULL && (strcmp(col3, "-") == 0 || strlen(col3) == 0))
+        // 1. Définition Usine
+        if (est_usine(col2) && (strcmp(col3, "-") == 0 || strlen(col3) == 0))
         {
-            // On convertit la capacité (long long car grand nombre)
             long long capacite = atoll(col4);
-            // On insère (ou met à jour) avec 0 en volume source
-            racine = insererNoeud(racine, col2, capacite, 0);
+            racine = insererNoeud(racine, col2, capacite, 0, 0);
         }
 
-        // CAS B : Connexion Source -> Usine (Volume Source) [cite: 69-73]
-        // La colonne 3 contient "Facility" (C'est l'usine qui reçoit)
-        // ET la colonne 2 NE contient PAS "Facility" (ce n'est pas une usine qui alimente une autre)
-        // ET la colonne 4 contient un volume (pas "-")
-        else if (strstr(col3, "Facility") != NULL && strstr(col2, "Facility") == NULL && strcmp(col4, "-") != 0)
+        // 2. Source -> Usine
+        else if (est_usine(col3) && !est_usine(col2) && strcmp(col4, "-") != 0)
         {
-            // On convertit le volume
-            double volume = atof(col4);
-            // On insère l'usine (si elle n'existe pas encore) avec capacité 0
-            // mais on AJOUTE ce volume au total
-            racine = insererNoeud(racine, col3, 0, volume);
+            double vol_source = atof(col4);
+            double fuite_pct = 0.0;
+
+            // Si la col 5 n'est pas vide ou "-", on la parse
+            if (strcmp(col5, "-") != 0 && strlen(col5) > 0)
+            {
+                fuite_pct = atof(col5);
+            }
+
+            // Calcul du volume réel (traité) = Source * (1 - fuite%)
+            // Attention : Si 3.777 signifie 3.777%, on divise par 100.
+            double vol_reel = vol_source * (1.0 - (fuite_pct / 100.0));
+
+            racine = insererNoeud(racine, col3, 0, vol_source, vol_reel);
+        }
+    }
+    fclose(fichier);
+
+    // --- Gestion des commandes ---
+    if (strcmp(commande, "histo") == 0)
+    {
+        // Le fichier de sortie doit avoir un nom unique selon le paramètre
+        // ex: vol_max.dat, vol_src.dat [cite: 290-293]
+        char nom_sortie[256];
+        int mode = 0;
+
+        if (strcmp(param, "max") == 0)
+        {
+            sprintf(nom_sortie, "vol_max.dat");
+            mode = 1;
+        }
+        else if (strcmp(param, "src") == 0)
+        {
+            sprintf(nom_sortie, "vol_captation.dat");
+            mode = 2;
+        }
+        else if (strcmp(param, "real") == 0)
+        {
+            sprintf(nom_sortie, "vol_traitement.dat");
+            mode = 3;
+        }
+
+        if (mode > 0)
+        {
+            FILE *f_out = fopen(nom_sortie, "w");
+            if (f_out != NULL)
+            {
+                // Parcours inverse (décroissant) pour l'histogramme
+                parcoursInverse(racine, f_out, mode);
+                fclose(f_out);
+                printf("Fichier généré : %s\n", nom_sortie);
+            }
         }
     }
 
-    // 4. Fermeture et Affichage
-    fclose(fichier);
-
-    printf("\n--- Résultat de l'import (Parcours Infixe) ---\n");
-    parcoursInfixe(racine);
-
-    // 5. Nettoyage mémoire obligatoire
     libererAVL(racine);
-
     return 0;
 }
