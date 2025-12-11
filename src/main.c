@@ -113,8 +113,6 @@ int main(int argc, char *argv[])
     // --- Gestion des commandes ---
     if (strcmp(commande, "histo") == 0)
     {
-        // Le fichier de sortie doit avoir un nom unique selon le paramètre
-        // ex: vol_max.dat, vol_src.dat [cite: 290-293]
         char nom_sortie[256];
         int mode = 0;
 
@@ -133,13 +131,22 @@ int main(int argc, char *argv[])
             sprintf(nom_sortie, "vol_traitement.dat");
             mode = 3;
         }
+        else if (strcmp(param, "all") == 0)
+        { // AJOUT DU BONUS
+            sprintf(nom_sortie, "histo_all.dat");
+            mode = 4;
+        }
 
         if (mode > 0)
         {
             FILE *f_out = fopen(nom_sortie, "w");
             if (f_out != NULL)
             {
-                // Parcours inverse (décroissant) pour l'histogramme
+                // Pour le mode all, on ajoute l'entête CSV comme dans l'exemple du prof
+                if (mode == 4)
+                {
+                    fprintf(f_out, "identifier;max volume(M.m3/year);source volume(M.m3/year);real volume(M.m3/year)\n");
+                }
                 parcoursInverse(racine, f_out, mode);
                 fclose(f_out);
                 printf("Fichier généré : %s\n", nom_sortie);

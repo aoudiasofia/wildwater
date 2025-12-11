@@ -164,18 +164,13 @@ void libererAVL(NoeudAVL *racine)
     }
 }
 
-// mode 1: max, mode 2: src, mode 3: real
+// mode 1: max, mode 2: src, mode 3: real, mode 4: all (bonus)
 void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
 {
     if (racine != NULL)
     {
-        // Ordre inverse : Droite -> Racine -> Gauche
+        // Ordre décroissant : Droite -> Racine -> Gauche
         parcoursInverse(racine->droite, flux_sortie, mode);
-
-        // Écriture selon le mode
-        // Note: Le sujet demande l'unité en M.m3 (Millions de m3) [cite: 568, 571, 576]
-        // Les données sont en m3 (ou milliers selon lecture), ajustons si nécessaire.
-        // Ici on écrit tel quel, on ajustera l'échelle dans le main ou le gnuplot.
 
         switch (mode)
         {
@@ -183,10 +178,17 @@ void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
             fprintf(flux_sortie, "%s;%lld\n", racine->usine->id, racine->usine->capacite);
             break;
         case 2: // src
-            fprintf(flux_sortie, "%s;%.2f\n", racine->usine->id, racine->usine->volume_source);
+            fprintf(flux_sortie, "%s;%.3f\n", racine->usine->id, racine->usine->volume_source);
             break;
-        case 3: // real (volume traité)
-            fprintf(flux_sortie, "%s;%.2f\n", racine->usine->id, racine->usine->volume_traite);
+        case 3: // real
+            fprintf(flux_sortie, "%s;%.3f\n", racine->usine->id, racine->usine->volume_traite);
+            break;
+        case 4: // all (BONUS) : identifier;max;source;real
+            fprintf(flux_sortie, "%s;%lld;%.3f;%.3f\n",
+                    racine->usine->id,
+                    racine->usine->capacite,
+                    racine->usine->volume_source,
+                    racine->usine->volume_traite);
             break;
         }
 
