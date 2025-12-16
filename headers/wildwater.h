@@ -6,7 +6,7 @@
 #include <string.h>
 #include <math.h>
 
-//histogramme
+// histogramme
 typedef struct Usine
 {
     char *id;
@@ -36,7 +36,7 @@ NoeudAVL *rotationGauche(NoeudAVL *x);
 void libererAVL(NoeudAVL *racine);
 void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode);
 
-//leaks
+// leaks
 struct Station;
 typedef struct Liaison
 {
@@ -68,14 +68,3 @@ void libererGraphe(NoeudIndex *indexRacine);
 double calculerFuites(Station *depart, double volume_initial);
 
 #endif
-
-
-/*algorithme Récursif :
- *un volume d'eau arrive dans la station actuelle
- *compte le nombre d'enfants (liaisons sortantes)
- *le volume est divisé équitablement : Vol_Par_Tuyau = Volume / Nb_Enfants
- *pour chaque tuyau :
- * - Calcul Perte = Vol_Par_Tuyau * (Pourcentage / 100)
- * - Volume Arrivée = Vol_Par_Tuyau - Perte
- * - Total Fuites += Perte + Appeler Récursivement(Enfant, Volume Arrivée)
- */
