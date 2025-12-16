@@ -76,3 +76,26 @@ if [ "$CMD" == "histo" ]; then
     fi
     # Fin du bloc if/elif/else
    
+   if [ -f "$INPUT" ]; then
+        echo "Génération des graphiques pour $INPUT..."
+
+        # 1. Isoler l'en-tête (la première ligne)
+        head -n 1 "$INPUT" > "header.tmp"
+
+        # 2. Trier le reste du fichier en ordre DÉCROISSANT
+        tail -n +2 "$INPUT" | sort -t';' -k$COL_KEY -n -r > "body_desc.tmp"
+
+        # 3. Extraire les données
+        head -n 10 "body_desc.tmp" > "top10_raw.tmp"
+        tail -n 50 "body_desc.tmp" > "min50_raw.tmp"
+
+        # 4. INVERSER L'ORDRE (tri ASCENDANT) pour l'affichage
+        sort -t';' -k$COL_KEY -n "top10_raw.tmp" > "body_top10.tmp"
+        sort -t';' -k$COL_KEY -n "min50_raw.tmp" > "body_min50.tmp"
+
+        # 5. Reconstruire les fichiers finaux avec l'en-tête
+        cat "header.tmp" "body_top10.tmp" > "top10.dat"
+        cat "header.tmp" "body_min50.tmp" > "min50.dat"
+
+        # Nettoyage intermédiaire
+        rm "header.tmp" "body_desc.tmp" "top10_raw.tmp" "min50_raw.tmp" "body_top10.tmp" "body_min50.tmp" 2>/dev/null
