@@ -99,3 +99,56 @@ if [ "$CMD" == "histo" ]; then
 
         # Nettoyage intermédiaire
         rm "header.tmp" "body_desc.tmp" "top10_raw.tmp" "min50_raw.tmp" "body_top10.tmp" "body_min50.tmp" 2>/dev/null
+        cat <<EOF > plot_script.gp
+set terminal png size 1200,800
+set datafile separator ';'
+set style data histograms
+set style fill solid border -1
+set ylabel "$YLABEL"
+set key outside top right
+
+if ("$ARG" eq "all") {
+    # Mode Empilé (Bonus)
+    set style histogram rowstacked
+    set boxwidth 0.8
+    set xtics rotate by -45 scale 0
+    
+    set output 'histo_all_high.png'
+    set title "$TITLE (Top 10)"
+    plot 'top10.dat' using 4:xtic(1) title 'Real' lc rgb '#ccccff', \
+         '' using (\$3-\$4) title 'Loss' lc rgb '#ff9999', \
+         '' using (\$2-\$3) title 'Unused' lc rgb '#ccffcc'
+
+    set output 'histo_all_low.png'
+    set title "$TITLE (Bottom 50)"
+    set xtics rotate by -90 scale 0 font ',8'
+    plot 'min50.dat' using 4:xtic(1) title 'Real' lc rgb '#ccccff', \
+         '' using (\$3-\$4) title 'Loss' lc rgb '#ff9999', \
+         '' using (\$2-\$3) title 'Unused' lc rgb '#ccffcc'
+
+} else {
+    # Mode Standard
+    set boxwidth 0.5
+    set xtics rotate by -45 scale 0
+    
+    set output 'histo_${ARG}_high.png'
+    set title "Top 10 : $TITLE"
+    plot 'top10.dat' using 2:xtic(1) notitle linecolor rgb '#4b89dc'
+
+    set output 'histo_${ARG}_low.png'
+    set title "Bottom 50 : $TITLE"
+    set xtics rotate by -90 scale 0 font ',8'
+    set boxwidth 0.8
+    plot 'min50.dat' using 2:xtic(1) notitle linecolor rgb '#dc4b4b'
+}
+EOF
+
+        # Exécution
+        gnuplot plot_script.gp
+        rm plot_script.gp top10.dat min50.dat 2>/dev/null
+        echo "Graphiques générés (Ordre croissant)."
+    else
+        echo "Erreur: Fichier $INPUT introuvable. Vérifiez l'exécution du C."
+        exit 4
+    fi
+fi
