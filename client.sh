@@ -45,3 +45,34 @@ fi
 END=$(date +%s.%N)
 DURATION=$(echo "$END - $START" | bc)
 echo "Traitement C terminé en $DURATION sec."
+
+#  4. Traitement Graphique 
+if [ "$CMD" == "histo" ]; then
+    
+    #config
+    if [ "$ARG" == "max" ]; then
+        INPUT="vol_max.dat"
+        TITLE="Capacité Maximale"
+        YLABEL="Capacité (m3)"
+        COL_KEY=2
+    elif [ "$ARG" == "src" ]; then
+        INPUT="vol_captation.dat"
+        TITLE="Volume Source Capté"
+        YLABEL="Volume (m3)"
+        COL_KEY=2
+    elif [ "$ARG" == "real" ]; then
+        INPUT="vol_traitement.dat"
+        TITLE="Volume Réellement Traité"
+        YLABEL="Volume (m3)"
+        COL_KEY=2
+    elif [ "$ARG" == "all" ]; then
+        INPUT="histo_all.dat"
+        TITLE="Données Station"
+        YLABEL="Volume (M.m3)"
+        COL_KEY=2
+    else
+        echo "Paramètre '$ARG' inconnu pour histo."
+        exit 1
+    fi
+    # Fin du bloc if/elif/else
+   
