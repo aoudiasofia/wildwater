@@ -143,6 +143,11 @@ if ("$ARG" eq "all") {
 }
 EOF
 
+    # Vérifier que gnuplot est disponible
+    if ! command -v gnuplot >/dev/null 2>&1; then
+        echo "Erreur: gnuplot introuvable. Installez-le (brew install gnuplot) puis relancez."
+        exit 5
+    fi  
         # Exécution
         gnuplot plot_script.gp
         rm plot_script.gp top10.dat min50.dat 2>/dev/null
