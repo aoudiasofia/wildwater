@@ -150,8 +150,110 @@ int main(int argc, char *argv[])
         libererAVL(racine);
     }
 
+ 
+    // MODE LEAKS : GRAPHE DE DISTRIBUTION
+    
+    else if (strcmp(commande, "leaks") == 0)
+    {
 
-   
+        NoeudIndex *index = NULL;
+        double volume_initial_usine = 0.0;
+        char *target_id = param;
+        int usine_trouvee = 0;
+
+        while (fgets(buffer, TAILLE_BUFFER, fichier))
+        {
+            recuperer_colonne(buffer, 2, col2, 256); // Amont
+            recuperer_colonne(buffer, 3, col3, 256); // Aval
+            recuperer_colonne(buffer, 4, col4, 256); // Volume
+            recuperer_colonne(buffer, 5, col5, 256); // Fuite
+
+            // CAS 1 : Source -> Usine Ciblée (On accumule le volume de départ)
+            if (strcmp(col3, target_id) == 0 && !est_usine(col2) && strcmp(col4, "-") != 0)
+            {
+                double vol = atof(col4);
+                double fuite = (strcmp(col5, "-") != 0) ? atof(col5) : 0.0;
+                // Le volume qui entre VRAIMENT dans l'usine (après perte captage)
+                volume_initial_usine += vol * (1.0 - (fuite / 100.0));
+                usine_trouvee = 1;
+            }
+
+            // CAS 2 : Connexion Réseau (Amont -> Aval)
+            // On ignore les lignes "Définition Usine" (col3 vide) et les lignes "Source -> Usine"
+            if (strcmp(col3, "-") != 0 && strlen(col3) > 0 && est_usine(col3) == 0)
+            {
+
+                // Recherche ou Création du noeud Amont
+                Station *s_amont = rechercherStation(index, col2);
+                if (s_amont == NULL)
+                {
+                    s_amont = creerStation(col2);
+                    index = insererIndex(index, col2, s_amont);
+                }
+
+                // Recherche ou Création du noeud Aval
+                Station *s_aval = rechercherStation(index, col3);
+                if (s_aval == NULL)
+                {
+                    s_aval = creerStation(col3);
+                    index = insererIndex(index, col3, s_aval);
+                }
+
+                // Création de la liaison avec le % de fuite
+                double fuite_troncon = (strcmp(col5, "-") != 0) ? atof(col5) : 0.0; // si col5 n'est pas "-" alors fuite = atof(col5) sinon fuite = 0.0.
+                ajouterLiaison(s_amont, s_aval, fuite_troncon);
+
+                // Si on croise l'ID de l'usine dans le graphe comme émetteur, on note qu'elle existe
+                if (strcmp(col2, target_id) == 0)
+                    usine_trouvee = 1;
+            }
+        }
+        fclose(fichier);
+
+        // --- CALCUL ET ÉCRITURE ---
+
+        // Ouverture en mode 'append' (ajout)
+        FILE *f_leaks = fopen("leaks.dat", "a");
+        if (f_leaks == NULL)
+        {
+            libererGraphe(index);
+            return 3;
+        }
+
+        // Si le fichier est vide, on met l'entête
+        fseek(f_leaks, 0, SEEK_END); // seek end pour vérifier la taille
+        if (ftell(f_leaks) == 0)
+        {
+            fprintf(f_leaks, "identifier;Leak volume (M.m3/year)\n");
+        }
+
+        if (usine_trouvee == 0)
+        {
+            // Usine introuvable -> -1
+            fprintf(f_leaks, "%s;-1\n", target_id);
+            printf("Usine %s introuvable ou sans données.\n", target_id);
+        }
+        else
+        {
+            // Lancement du calcul récursif
+            Station *start_node = rechercherStation(index, target_id);
+            // Si le noeud de départ n'est pas dans le graphe (pas de sortie), fuites = 0 sur le réseau aval
+            double total_pertes = 0.0;
+            if (start_node != NULL)
+            {
+                total_pertes = calculerFuites(start_node, volume_initial_usine);
+            }
+
+            // Écriture du résultat
+            fprintf(f_leaks, "%s;%.3f\n", target_id, total_pertes);
+            printf("Usine : %s | Volume Init : %.2f | Pertes Totales : %.2f\n",
+                   target_id, volume_initial_usine, total_pertes);}
+
+        fclose(f_leaks);
+        libererGraphe(index);
+    }
+
+    return 0;
 }
 
     
