@@ -9,7 +9,6 @@ Usine *creerUsine(char *id, long long capacite)
         fprintf(stderr, "Erreur d'allocation pour l'usine.\n");
         exit(EXIT_FAILURE);
     }
-
     u->id = strdup(id); // strdup alloue de la mémoire et copie la chaine 'id' dedans
     if (u->id == NULL)
     {
@@ -17,11 +16,9 @@ Usine *creerUsine(char *id, long long capacite)
         free(u);
         exit(EXIT_FAILURE);
     }
-
     u->capacite = capacite;
     u->volume_source = 0.0;
     u->volume_traite = 0.0;
-
     return u;
 }
 
@@ -69,7 +66,7 @@ NoeudAVL *creerNoeud(Usine *data)
     n->usine = data;
     n->gauche = NULL;
     n->droite = NULL;
-    n->hauteur = 1; // Un nouveau noeud est toujours une feuille de hauteur 1
+    n->hauteur = 1;
     return n;
 }
 
@@ -77,13 +74,10 @@ NoeudAVL *rotationDroite(NoeudAVL *y)
 {
     NoeudAVL *x = y->gauche;
     NoeudAVL *T2 = x->droite;
-
     x->droite = y;
     y->gauche = T2;
-
     y->hauteur = max(hauteur(y->gauche), hauteur(y->droite)) + 1;
     x->hauteur = max(hauteur(x->gauche), hauteur(x->droite)) + 1;
-
     return x;
 }
 
@@ -91,13 +85,10 @@ NoeudAVL *rotationGauche(NoeudAVL *x)
 {
     NoeudAVL *y = x->droite;
     NoeudAVL *T2 = y->gauche;
-
     y->gauche = x;
     x->droite = T2;
-
     x->hauteur = max(hauteur(x->gauche), hauteur(x->droite)) + 1;
     y->hauteur = max(hauteur(y->gauche), hauteur(y->droite)) + 1;
-
     return y;
 }
 
@@ -113,7 +104,6 @@ NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajo
     }
 
     int compar = strcmp(id, noeud->usine->id);
-
     if (compar < 0)
         noeud->gauche = insererNoeud(noeud->gauche, id, capacite, ajoute_volume_source, ajoute_volume_reel);
     else if (compar > 0)
@@ -130,7 +120,7 @@ NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajo
         return noeud;
     }
 
-    // 2. Mise à jour hauteur et 3. Equilibrage (inchangé)
+    // 2. Mise à jour hauteur. Equilibrage
     noeud->hauteur = 1 + max(hauteur(noeud->gauche), hauteur(noeud->droite));
     int balance = facteurEquilibre(noeud);
 
@@ -148,7 +138,6 @@ NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajo
         noeud->droite = rotationDroite(noeud->droite);
         return rotationGauche(noeud);
     }
-
     return noeud;
 }
 
@@ -158,20 +147,18 @@ void libererAVL(NoeudAVL *racine)
     {
         libererAVL(racine->gauche);
         libererAVL(racine->droite);
-
         libererUsine(racine->usine);
         free(racine);
     }
 }
 
-// mode 1: max, mode 2: src, mode 3: real, mode 4: all (bonus)
+// mode 1: max, mode 2: src, mode 3: real, mode 4: all
 void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
 {
     if (racine != NULL)
     {
         // Ordre décroissant : Droite -> Racine -> Gauche
         parcoursInverse(racine->droite, flux_sortie, mode);
-
         switch (mode)
         {
         case 1: // max
@@ -183,7 +170,7 @@ void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
         case 3: // real
             fprintf(flux_sortie, "%s;%.3f\n", racine->usine->id, racine->usine->volume_traite);
             break;
-        case 4: // all (BONUS) : identifier;max;source;real
+        case 4: // all : identifier;max;source;real
             fprintf(flux_sortie, "%s;%lld;%.3f;%.3f\n",
                     racine->usine->id,
                     racine->usine->capacite,
@@ -191,7 +178,6 @@ void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
                     racine->usine->volume_traite);
             break;
         }
-
         parcoursInverse(racine->gauche, flux_sortie, mode);
     }
 }
