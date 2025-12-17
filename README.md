@@ -1,60 +1,70 @@
-# Projet MEF2-A
-# WILDWATER — C‑WildWater 🌊
+# 🌊 WILDWATER — C‑WildWater
 
-Traitement de données hydrauliques : génération d'histogrammes et calcul des fuites à partir d'un fichier .dat.
+![Language C](https://img.shields.io/badge/Language-C-blue) ![Shell Script](https://img.shields.io/badge/Script-Shell-yellow) ![Gnuplot](https://img.shields.io/badge/Viz-Gnuplot-red)
+
+**Traitement et analyse de données hydrauliques massives.**
+Ce projet permet d'analyser un réseau de distribution d'eau, de générer des histogrammes de consommation et de calculer les pertes (fuites) sur le réseau à partir de fichiers `.dat`.
 
 ---
 
-## 🤝 Collaborateurs
+## 🤝 L'Équipe
+Projet réalisé par :
 - [**AOUDIA Sofia**](https://github.com/aoudiasofia)
-- [**DELECHENEAU Camille**]()
-- [**PHILIPPOT Lucie**]()
+- [**DELECHENEAU Camille**](https://github.com/delecheneaucamille)
+- [**PHILIPPOT Lucie**](https://github.com/luciephilippot)
 
 ---
 
 ## 🚀 Fonctionnalités
 
-- Commande `histo` : génère des fichiers de données (vol_max, vol_captation, vol_traitement, histo_all) puis des histogrammes PNG (top10 / bottom50).
-- Commande `leaks` : calcule les pertes totales pour une usine donnée et écrit dans `leaks.dat`.
-- Script `client.sh` : wrapper pratique qui exécute le binaire C, trie/filtre les .dat et appelle gnuplot.
+Le projet se divise en deux modules principaux :
+
+### 1. Module `histo` (Analyse de volumes)
+- Génère des statistiques sur les stations (max, captation, traitement, global).
+- Utilise **Arbres AVL** pour un tri et un stockage rapide des données.
+- Produit automatiquement des graphiques PNG via **Gnuplot** (Top 10 / Bottom 50).
+
+### 2. Module `leaks` (Détection de fuites)
+- Reconstitue la topologie du réseau sous forme de **Graphe orienté**.
+- Calcule les pertes totales pour une usine donnée en parcourant récursivement le réseau jusqu'aux clients.
+- Exporte les résultats dans le fichier `leaks.dat`.
 
 ---
 
-## 📂 Structure du projet (fichiers importants)
+## 📂 Structure du projet
 
-- `src/` ou racine :
-  - `main.c` (ou `c-wildwater`) — lecture CSV, construction des structures, génération des .dat
-  - `client.sh` — script de post‑traitement + génération Gnuplot
-  - `Makefile`
-- `headers/wildwater.h` — définitions des structures Usine, AVL, Station, prototypes (histo + leaks)
-- Fichiers produits :
-  - `vol_max.dat`, `vol_captation.dat`, `vol_traitement.dat`, `histo_all.dat`
-  - `leaks.dat`
-  - PNG générés : `histo_<param>_high.png`, `histo_<param>_low.png`, `histo_all_*.png`
-
----
+```text
+.
+├── src/
+│   ├── main.c           # Point d'entrée, parsing CSV et logique principale
+│   └── ...
+├── headers/
+│   └── wildwater.h      # Prototypes et structures (Station, Liaison, AVL)
+├── client.sh            # Script Shell (Wrapper) : lance le C + Gnuplot
+├── Makefile             # Automatisation de la compilation
+├── data/                # Dossier contenant vos fichiers .dat
+└── README.md
 
 ## 🛠️ Installation & compilation
 
+## 🛠️ Installation & Compilation
+
 ### Prérequis
-- gcc / clang
-- make (optionnel)
-- gnuplot (pour générer les PNG)
+- **GCC** ou **Clang** : Compilateur C standard.
+- **Gnuplot** : Indispensable pour la génération des graphiques (commande `histo`).
+  - *macOS* : `brew install gnuplot`
+  - *Linux* : `sudo apt-get install gnuplot`
 
-Installer gnuplot sur macOS (Homebrew) :
-```bash
-brew install gnuplot
-```
+### Compilation
 
-### Avec make (recommandé)
+**Option 1 : Avec Make (Recommandé)**
+À la racine du projet, lancez simplement :
 ```bash
-cd /Users/sofia/Desktop/wildwater/wildwater
 make
-```
 
 ### Sans make
 ```bash
-gcc -Wall -o c-wildwater main.c ...           # ajouter les fichiers sources nécessaires
+gcc -Wall -o c-wildwater src/main.c
 ```
 
 Rendre le script exécutable :
