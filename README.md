@@ -1,6 +1,5 @@
 # 🌊 WILDWATER — C‑WildWater
 
-![Language C](https://img.shields.io/badge/Language-C-blue) ![Shell Script](https://img.shields.io/badge/Script-Shell-yellow) ![Gnuplot](https://img.shields.io/badge/Viz-Gnuplot-red)
 
 **Traitement et analyse de données hydrauliques massives.**
 Ce projet permet d'analyser un réseau de distribution d'eau, de générer des histogrammes de consommation et de calculer les pertes (fuites) sur le réseau à partir de fichiers `.dat`.
@@ -44,10 +43,9 @@ Le projet se divise en deux modules principaux :
 ├── Makefile             # Automatisation de la compilation
 ├── data/                # Dossier contenant vos fichiers .dat
 └── README.md
+```
 
-## 🛠️ Installation & compilation
-
-## 🛠️ Installation & Compilation
+##  🛠️ Installation & Compilation
 
 ### Prérequis
 - **GCC** ou **Clang** : Compilateur C standard.
