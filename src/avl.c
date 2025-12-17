@@ -14,7 +14,7 @@ Usine *creerUsine(char *id, long long capacite)
     {
         fprintf(stderr, "Erreur d'allocation pour l'ID de l'usine.\n");
         free(u);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     u->capacite = capacite;
     u->volume_source = 0.0;
