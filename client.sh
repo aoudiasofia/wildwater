@@ -5,7 +5,7 @@ FICHIER="$1"
 CMD="$2"      
 ARG="$3"     
 
-# 1. Vérification des arguments
+# vérification des arguments
 if [ -z "$FICHIER" ] || [ -z "$CMD" ]; then
     echo "Usage: $0 <fichier.dat> <commande> [parametre]"
     exit 1
@@ -19,7 +19,7 @@ if [ "$CMD" == "help" ]; then
     exit 0
 fi
 
-#  2. Compilation
+#Compilation
 EXECUTABLE="./c-wildwater"
 if [ ! -f "$EXECUTABLE" ]; then
     echo "Compilation en cours..."
@@ -30,12 +30,12 @@ if [ ! -f "$EXECUTABLE" ]; then
     fi
 fi
 
-# 3. Exécution du programme C aavec mesure du temps
+#Exécution du programme C aavec mesure du temps
 rm -f *.png
 echo "Lancement du traitement C..."
 START=$(date +%s.%N)
 
-# Utilisation des nouvelles variables
+#utilisation des nouvelles variables
 $EXECUTABLE "$FICHIER" "$CMD" "$ARG"
 if [ $? -ne 0 ]; then
     echo "Erreur lors de l'exécution du programme C."
@@ -46,7 +46,7 @@ END=$(date +%s.%N)
 DURATION=$(echo "$END - $START" | bc)
 echo "Traitement C terminé en $DURATION sec."
 
-#  4. Traitement Graphique 
+# traitement Graphique 
 if [ "$CMD" == "histo" ]; then
     
     #config
@@ -79,27 +79,27 @@ if [ "$CMD" == "histo" ]; then
    if [ -f "$INPUT" ]; then
         echo "Génération des graphiques pour $INPUT..."
 
-        # 1. Isoler l'en-tête (la première ligne)
-        head -n 1 "$INPUT" > "header.tmp"
+        # Isoler l'en-tête (la première ligne)
+        head -n 1 "$INPUT" > "header.tmp" 
 
-        # 2. Trier le reste du fichier en ordre DÉCROISSANT
-        tail -n +2 "$INPUT" | sort -t';' -k$COL_KEY -n -r > "body_desc.tmp"
+        # Trier le reste du fichier en ordre DÉCROISSANT
+        tail -n +2 "$INPUT" | sort -t';' -k$COL_KEY -n -r > "body_desc.tmp" #tri décroissant
 
-        # 3. Extraire les données
+        # Extraire les données
         head -n 10 "body_desc.tmp" > "top10_raw.tmp"
         tail -n 50 "body_desc.tmp" > "min50_raw.tmp"
 
-        # 4. INVERSER L'ORDRE (tri ASCENDANT) pour l'affichage
-        sort -t';' -k$COL_KEY -n "top10_raw.tmp" > "body_top10.tmp"
+        # INVERSER L'ORDRE (tri ASCENDANT) pour l'affichage
+        sort -t';' -k$COL_KEY -n "top10_raw.tmp" > "body_top10.tmp" #tri croissant
         sort -t';' -k$COL_KEY -n "min50_raw.tmp" > "body_min50.tmp"
 
-        # 5. Reconstruire les fichiers finaux avec l'en-tête
-        cat "header.tmp" "body_top10.tmp" > "top10.dat"
+        # Reconstruire les fichiers finaux avec l'en-tête
+        cat "header.tmp" "body_top10.tmp" > "top10.dat" 
         cat "header.tmp" "body_min50.tmp" > "min50.dat"
 
         # Nettoyage intermédiaire
         rm "header.tmp" "body_desc.tmp" "top10_raw.tmp" "min50_raw.tmp" "body_top10.tmp" "body_min50.tmp" 2>/dev/null
-        cat <<EOF > plot_script.gp
+        cat <<EOF > plot_script.gp #utilisée pour écrire plusieurs lignes dans un fichier de configuration de manière propre
 set terminal png size 1200,800
 set datafile separator ';'
 set style data histograms
