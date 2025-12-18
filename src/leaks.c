@@ -45,8 +45,9 @@ static int max_int(int a, int b)
 
 static int equilibre_index(NoeudIndex *n)
 {
-    if (n == NULL)
+    if (n == NULL){
         return 0;
+    }
     return h_index(n->gauche) - h_index(n->droite);
 }
 
