@@ -111,8 +111,8 @@ open histo_max_high.png
 
 ---
 
-## 📄 Rapport / Documentation
+## 📄 Rapport de projet
 
-Ajouter ici le lien vers le rapport de projet ou la documentation si disponible.
+  Vous pouvez consulter le rapport de projet en cliquant sur le lien, ci-dessous :
 
----
+ - [📕 Rapport de projet (PDF)](rapportMEF2-A.pdf)
