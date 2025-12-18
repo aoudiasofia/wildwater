@@ -20,7 +20,7 @@ if [ "$CMD" == "help" ]; then
 fi
 
 #Compilation
-EXECUTABLE="./c-wildwater". #il vérifie si le programme C (./c-wildwater) existe déjà.
+EXECUTABLE="./c-wildwater" #il vérifie si le programme C (./c-wildwater) existe déjà.
 if [ ! -f "$EXECUTABLE" ]; then
     echo "Compilation en cours..."
     make
@@ -31,7 +31,7 @@ if [ ! -f "$EXECUTABLE" ]; then
 fi
 
 #Exécution du programme C aavec mesure du temps
-rm -f *.png. #supprime les anciens fichiers .png 
+rm -f *.png #supprime les anciens fichiers .png 
 echo "Lancement du traitement C..."
 START=$(date +%s.%N) #Mesure du temps 
 
