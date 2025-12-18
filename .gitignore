@@ -1,9 +1,15 @@
-vol_traitement.dat
-histo_all.dat
+# Données générées
+*.dat
+*.tmp
+
+# Graphiques
+*.png
+
+# Binaire
 c-wildwater
-leaks.dat
-vol_captation.dat
-vol_max.dat
-src/leaks.o
-src/avl.o
-src/main.o
+
+# Fichiers objets
+*.o
+
+
+*.dat

@@ -7,14 +7,14 @@ Usine *creerUsine(char *id, long long capacite)
     if (u == NULL)
     {
         fprintf(stderr, "Erreur d'allocation pour l'usine.\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     u->id = strdup(id); // strdup alloue de la mémoire et copie la chaine 'id' dedans
     if (u->id == NULL)
     {
         fprintf(stderr, "Erreur d'allocation pour l'ID de l'usine.\n");
         free(u);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     u->capacite = capacite;
     u->volume_source = 0.0;
