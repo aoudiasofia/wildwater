@@ -20,20 +20,20 @@ if [ "$CMD" == "help" ]; then
 fi
 
 #Compilation
-EXECUTABLE="./c-wildwater"
+EXECUTABLE="./c-wildwater". #il vérifie si le programme C (./c-wildwater) existe déjà.
 if [ ! -f "$EXECUTABLE" ]; then
     echo "Compilation en cours..."
     make
     if [ $? -ne 0 ]; then
-        echo "Erreur de compilation."
+        echo "Erreur de compilation." #Si make échoue, le script s'arrête immédiatement (exit 2) pour éviter de lancer un programme défectueux.
         exit 2
     fi
 fi
 
 #Exécution du programme C aavec mesure du temps
-rm -f *.png
+rm -f *.png. #supprime les anciens fichiers .png 
 echo "Lancement du traitement C..."
-START=$(date +%s.%N)
+START=$(date +%s.%N) #Mesure du temps 
 
 #utilisation des nouvelles variables
 $EXECUTABLE "$FICHIER" "$CMD" "$ARG"
