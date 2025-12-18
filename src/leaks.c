@@ -5,8 +5,9 @@
 Station *creerStation(char *id)
 {
     Station *s = (Station *)malloc(sizeof(Station));
-    if (s == NULL)
-        exit(EXIT_FAILURE);
+    if (s == NULL){
+        exit(1);
+    }
 
     s->id = strdup(id);
     s->liste_enfants = NULL;
@@ -16,9 +17,8 @@ Station *creerStation(char *id)
 Liaison *ajouterLiaison(Station *parent, Station *enfant, double fuite)
 {
     Liaison *l = (Liaison *)malloc(sizeof(Liaison));
-    if (l == NULL)
-    {
-        exit(EXIT_FAILURE);
+    if (l == NULL) {
+        exit(1);
     }
     l->enfant = enfant;
     l->pourcentage_fuite = fuite;
@@ -87,28 +87,29 @@ NoeudIndex *insererIndex(NoeudIndex *noeud, char *id, Station *station)
     }
 
     int cmp = strcmp(id, noeud->id);
-    if (cmp < 0)
+    if (cmp < 0){
         noeud->gauche = insererIndex(noeud->gauche, id, station);
-    else if (cmp > 0)
+    } else if (cmp > 0) {
         noeud->droite = insererIndex(noeud->droite, id, station);
-    else
+    } else {
         return noeud; // Déjà présent, on ne fait rien
+    }
 
     // Équilibrage
     noeud->hauteur = 1 + max_int(h_index(noeud->gauche), h_index(noeud->droite));
     int bal = equilibre_index(noeud);
 
-    if (bal > 1 && strcmp(id, noeud->gauche->id) < 0)
+    if (bal > 1 && strcmp(id, noeud->gauche->id) < 0){
         return rotD_index(noeud);
-    if (bal < -1 && strcmp(id, noeud->droite->id) > 0)
+    }
+    if (bal < -1 && strcmp(id, noeud->droite->id) > 0){
         return rotG_index(noeud);
-    if (bal > 1 && strcmp(id, noeud->gauche->id) > 0)
-    {
+    }
+    if (bal > 1 && strcmp(id, noeud->gauche->id) > 0){
         noeud->gauche = rotG_index(noeud->gauche);
         return rotD_index(noeud);
     }
-    if (bal < -1 && strcmp(id, noeud->droite->id) < 0)
-    {
+    if (bal < -1 && strcmp(id, noeud->droite->id) < 0){
         noeud->droite = rotD_index(noeud->droite);
         return rotG_index(noeud);
     }
@@ -118,13 +119,16 @@ NoeudIndex *insererIndex(NoeudIndex *noeud, char *id, Station *station)
 
 Station *rechercherStation(NoeudIndex *racine, char *id)
 {
-    if (racine == NULL)
+    if (racine == NULL){
         return NULL;
+    }
     int cmp = strcmp(id, racine->id);
-    if (cmp == 0)
+    if (cmp == 0){
         return racine->station;
-    if (cmp < 0)
+    }
+    if (cmp < 0){
         return rechercherStation(racine->gauche, id);
+    }
     return rechercherStation(racine->droite, id);
 }
 
@@ -141,9 +145,9 @@ double calculerFuites(Station *depart, double volume_initial)
      * - Volume Arrivée = Vol_Par_Tuyau - Perte
      * - Total Fuites += Perte + Appeler Récursivement(Enfant, Volume Arrivée)
      */
-    if (depart == NULL || volume_initial <= 0)
+    if (depart == NULL || volume_initial <= 0){
         return 0.0;
-
+    }
     // 1. Compter les enfants
     int nb_enfants = 0;
     Liaison *curr = depart->liste_enfants;
@@ -152,8 +156,9 @@ double calculerFuites(Station *depart, double volume_initial)
         nb_enfants++;
         curr = curr->suivant;
     }
-    if (nb_enfants == 0)
+    if (nb_enfants == 0){
         return 0.0; // Fin de ligne (Usager), pas de fuite avale
+    }
 
     // 2. Répartition équitable
     double vol_par_tuyau = volume_initial / nb_enfants;
