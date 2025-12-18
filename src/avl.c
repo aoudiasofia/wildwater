@@ -61,7 +61,7 @@ NoeudAVL *creerNoeud(Usine *data)
     if (n == NULL)
     {
         fprintf(stderr, "Erreur d'allocation pour le noeud AVL.\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     n->usine = data;
     n->gauche = NULL;
@@ -92,8 +92,7 @@ NoeudAVL *rotationGauche(NoeudAVL *x)
     return y;
 }
 
-NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajoute_volume_source, double ajoute_volume_reel)
-{
+NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajoute_volume_source, double ajoute_volume_reel){
     // 1. Insertion normale
     if (noeud == NULL)
     {
@@ -104,19 +103,21 @@ NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajo
     }
 
     int compar = strcmp(id, noeud->usine->id);
-    if (compar < 0)
+    if (compar < 0){
         noeud->gauche = insererNoeud(noeud->gauche, id, capacite, ajoute_volume_source, ajoute_volume_reel);
-    else if (compar > 0)
+    } else if (compar > 0) {
         noeud->droite = insererNoeud(noeud->droite, id, capacite, ajoute_volume_source, ajoute_volume_reel);
-    else
-    {
+    } else {
         // Mise à jour existante
-        if (capacite > 0)
+        if (capacite > 0){
             noeud->usine->capacite = capacite;
-        if (ajoute_volume_source > 0)
+        }
+        if (ajoute_volume_source > 0){
             noeud->usine->volume_source += ajoute_volume_source;
-        if (ajoute_volume_reel > 0)
+        }
+        if (ajoute_volume_reel > 0){
             noeud->usine->volume_traite += ajoute_volume_reel;
+        }
         return noeud;
     }
 
@@ -124,17 +125,17 @@ NoeudAVL *insererNoeud(NoeudAVL *noeud, char *id, long long capacite, double ajo
     noeud->hauteur = 1 + max(hauteur(noeud->gauche), hauteur(noeud->droite));
     int balance = facteurEquilibre(noeud);
 
-    if (balance > 1 && strcmp(id, noeud->gauche->usine->id) < 0)
+    if (balance > 1 && strcmp(id, noeud->gauche->usine->id) < 0){
         return rotationDroite(noeud);
-    if (balance < -1 && strcmp(id, noeud->droite->usine->id) > 0)
+    }
+    if (balance < -1 && strcmp(id, noeud->droite->usine->id) > 0){
         return rotationGauche(noeud);
-    if (balance > 1 && strcmp(id, noeud->gauche->usine->id) > 0)
-    {
+    }
+    if (balance > 1 && strcmp(id, noeud->gauche->usine->id) > 0){
         noeud->gauche = rotationGauche(noeud->gauche);
         return rotationDroite(noeud);
     }
-    if (balance < -1 && strcmp(id, noeud->droite->usine->id) < 0)
-    {
+    if (balance < -1 && strcmp(id, noeud->droite->usine->id) < 0){
         noeud->droite = rotationDroite(noeud->droite);
         return rotationGauche(noeud);
     }
@@ -159,8 +160,7 @@ void parcoursInverse(NoeudAVL *racine, FILE *flux_sortie, int mode)
     {
         // Ordre décroissant : Droite -> Racine -> Gauche
         parcoursInverse(racine->droite, flux_sortie, mode);
-        switch (mode)
-        {
+        switch (mode){
         case 1: // max
             fprintf(flux_sortie, "%s;%lld\n", racine->usine->id, racine->usine->capacite);
             break;
