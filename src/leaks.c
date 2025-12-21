@@ -5,7 +5,8 @@
 Station *creerStation(char *id)
 {
     Station *s = (Station *)malloc(sizeof(Station));
-    if (s == NULL){
+    if (s == NULL)
+    {
         exit(1);
     }
 
@@ -17,7 +18,8 @@ Station *creerStation(char *id)
 Liaison *ajouterLiaison(Station *parent, Station *enfant, double fuite)
 {
     Liaison *l = (Liaison *)malloc(sizeof(Liaison));
-    if (l == NULL) {
+    if (l == NULL)
+    {
         exit(1);
     }
     l->enfant = enfant;
@@ -45,7 +47,8 @@ static int max_int(int a, int b)
 
 static int equilibre_index(NoeudIndex *n)
 {
-    if (n == NULL){
+    if (n == NULL)
+    {
         return 0;
     }
     return h_index(n->gauche) - h_index(n->droite);
@@ -88,11 +91,16 @@ NoeudIndex *insererIndex(NoeudIndex *noeud, char *id, Station *station)
     }
 
     int cmp = strcmp(id, noeud->id);
-    if (cmp < 0){
+    if (cmp < 0)
+    {
         noeud->gauche = insererIndex(noeud->gauche, id, station);
-    } else if (cmp > 0) {
+    }
+    else if (cmp > 0)
+    {
         noeud->droite = insererIndex(noeud->droite, id, station);
-    } else {
+    }
+    else
+    {
         return noeud; // Déjà présent, on ne fait rien
     }
 
@@ -100,17 +108,21 @@ NoeudIndex *insererIndex(NoeudIndex *noeud, char *id, Station *station)
     noeud->hauteur = 1 + max_int(h_index(noeud->gauche), h_index(noeud->droite));
     int bal = equilibre_index(noeud);
 
-    if (bal > 1 && strcmp(id, noeud->gauche->id) < 0){
+    if (bal > 1 && strcmp(id, noeud->gauche->id) < 0)
+    {
         return rotD_index(noeud);
     }
-    if (bal < -1 && strcmp(id, noeud->droite->id) > 0){
+    if (bal < -1 && strcmp(id, noeud->droite->id) > 0)
+    {
         return rotG_index(noeud);
     }
-    if (bal > 1 && strcmp(id, noeud->gauche->id) > 0){
+    if (bal > 1 && strcmp(id, noeud->gauche->id) > 0)
+    {
         noeud->gauche = rotG_index(noeud->gauche);
         return rotD_index(noeud);
     }
-    if (bal < -1 && strcmp(id, noeud->droite->id) < 0){
+    if (bal < -1 && strcmp(id, noeud->droite->id) < 0)
+    {
         noeud->droite = rotD_index(noeud->droite);
         return rotG_index(noeud);
     }
@@ -120,20 +132,21 @@ NoeudIndex *insererIndex(NoeudIndex *noeud, char *id, Station *station)
 
 Station *rechercherStation(NoeudIndex *racine, char *id)
 {
-    if (racine == NULL){
+    if (racine == NULL)
+    {
         return NULL;
     }
     int cmp = strcmp(id, racine->id);
-    if (cmp == 0){
+    if (cmp == 0)
+    {
         return racine->station;
     }
-    if (cmp < 0){
+    if (cmp < 0)
+    {
         return rechercherStation(racine->gauche, id);
     }
     return rechercherStation(racine->droite, id);
 }
-
-// calcule fuites à partir d'une station donnée
 
 double calculerFuites(Station *depart, double volume_initial)
 {
@@ -146,10 +159,11 @@ double calculerFuites(Station *depart, double volume_initial)
      * - Volume Arrivée = Vol_Par_Tuyau - Perte
      * - Total Fuites += Perte + Appeler Récursivement(Enfant, Volume Arrivée)
      */
-    if (depart == NULL || volume_initial <= 0){
+    if (depart == NULL || volume_initial <= 0)
+    {
         return 0.0;
     }
-    // 1. Compter les enfants
+    // Compter les enfants
     int nb_enfants = 0;
     Liaison *curr = depart->liste_enfants;
     while (curr != NULL)
@@ -157,24 +171,20 @@ double calculerFuites(Station *depart, double volume_initial)
         nb_enfants++;
         curr = curr->suivant;
     }
-    if (nb_enfants == 0){
-        return 0.0; // Fin de ligne (Usager), pas de fuite avale
+    if (nb_enfants == 0)
+    {
+        return 0.0;
     }
 
-    // 2. Répartition équitable
+    // Parcours des enfants
     double vol_par_tuyau = volume_initial / nb_enfants;
     double total_fuites = 0.0;
-
-    // 3. Parcours des enfants
     curr = depart->liste_enfants;
     while (curr != NULL)
     {
         double perte_ici = vol_par_tuyau * (curr->pourcentage_fuite / 100.0);
         double vol_restant = vol_par_tuyau - perte_ici;
-
-        // Somme = Fuite locale + Fuites de tout le sous-réseau
         total_fuites += perte_ici + calculerFuites(curr->enfant, vol_restant);
-
         curr = curr->suivant;
     }
 

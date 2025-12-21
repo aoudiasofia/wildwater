@@ -27,7 +27,7 @@ Le projet se divise en deux modules principaux :
 
 ### 2. Module `leaks` (Détection de fuites)
 
-- Reconstitue la topologie du réseau sous forme de **Graphe orienté**.
+- Reconstitue réseau sous forme de **Graphe orienté**.
 - Calcule les pertes totales pour une usine donnée en parcourant récursivement le réseau jusqu'aux clients.
 - Exporte les résultats dans le fichier `leaks.dat`.
 
@@ -38,13 +38,15 @@ Le projet se divise en deux modules principaux :
 ```text
 .
 ├── src/
-│   ├── main.c           # Point d'entrée, parsing CSV et logique principale
-│   └── ...
+│   ├── main.c           # Point d'entrée, parsing CSV et logique prncipale
+    ├── avl.c
+
+    ├── leaks.c
 ├── headers/
 │   └── wildwater.h      # Prototypes et structures (Station, Liaison, AVL)
 ├── client.sh            # Script Shell (Wrapper) : lance le C + Gnuplot
 ├── Makefile             # Automatisation de la compilation
-├── data/                # Dossier contenant vos fichiers .dat
+├── c-wildwater_v3.dat      
 └── README.md
 ```
 
@@ -86,14 +88,14 @@ chmod +x client.sh
 ./c-wildwater data.dat histo max
 ```
 
-2) Lancer le wrapper graphique (génère PNG via gnuplot) :
+1) Lancer le wrapper graphique (génère PNG via gnuplot) :
 
 ```bash
 ./client.sh data.dat histo max
 open histo_max_high.png
 ```
 
-3) Calculer les fuites pour une usine :
+1) Calculer les fuites pour une usine :
 
 ```bash
 ./c-wildwater data.dat leaks USINE_ID
@@ -115,4 +117,4 @@ open histo_max_high.png
 
   Vous pouvez consulter le rapport de projet en cliquant sur le lien, ci-dessous :
 
- - [📕 Rapport de projet (PDF)](rapport-Wildwater-MEF2-A.pdf)
+- [📕 Rapport de projet (PDF)](rapport-Wildwater-MEF2-A.pdf)

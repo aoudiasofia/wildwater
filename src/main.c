@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include "../headers/wildwater.h"
 
 #define TAILLE_BUFFER 4096
@@ -25,13 +25,16 @@ void recuperer_colonne(char *ligne, int index_colonne, char *dest, int taille_ma
     {
         fin = strchr(debut, ';');
         int longueur;
-        if (fin != NULL){
+        if (fin != NULL)
+        {
             longueur = fin - debut;
         }
-        else {
+        else
+        {
             longueur = strcspn(debut, "\r\n");
         }
-        if (longueur >= taille_max){
+        if (longueur >= taille_max)
+        {
             longueur = taille_max - 1;
         }
         strncpy(dest, debut, longueur);
@@ -46,16 +49,20 @@ void recuperer_colonne(char *ligne, int index_colonne, char *dest, int taille_ma
 // Vérifie si l'ID correspond à un type de station connu
 int est_usine(char *str)
 {
-    if(strstr(str, "Facility") != NULL){
-        return 1;
-    } 
-    if(strstr(str, "Plant") != NULL){
+    if (strstr(str, "Facility") != NULL)
+    {
         return 1;
     }
-    if(strstr(str, "Unit") != NULL){
+    if (strstr(str, "Plant") != NULL)
+    {
         return 1;
     }
-    if( strstr(str, "Module") != NULL){
+    if (strstr(str, "Unit") != NULL)
+    {
+        return 1;
+    }
+    if (strstr(str, "Module") != NULL)
+    {
         return 1;
     }
     return 0;
@@ -83,7 +90,7 @@ int main(int argc, char *argv[])
     char col2[256], col3[256], col4[256], col5[256];
 
     // MODE HISTO : ARBRE AVL DES USINES
-    
+
     if (strcmp(commande, "histo") == 0)
     {
         NoeudAVL *racine = NULL;
@@ -106,7 +113,7 @@ int main(int argc, char *argv[])
             {
                 double vol_source = atof(col4);
                 double fuite_pct = (strcmp(col5, "-") != 0) ? atof(col5) : 0.0; // si col5 n'est pas "-" alors fuite = atof(col5) sinon fuite = 0.0.
-                double vol_reel = vol_source * (1.0 - (fuite_pct / 100.0)); // On applique la perte captage
+                double vol_reel = vol_source * (1.0 - (fuite_pct / 100.0));     // On applique la perte captage
                 racine = insererNoeud(racine, col3, 0, vol_source, vol_reel);
             }
         }
@@ -140,9 +147,10 @@ int main(int argc, char *argv[])
             FILE *f_out = fopen(nom_sortie, "w");
             if (f_out != NULL)
             {
-                if (mode == 4){
+                if (mode == 4)
+                {
                     fprintf(f_out, "identifier;max volume(M.m3/year);source volume(M.m3/year);real volume(M.m3/year)\n");
-                } 
+                }
                 parcoursInverse(racine, f_out, mode);
                 fclose(f_out);
             }
@@ -150,9 +158,8 @@ int main(int argc, char *argv[])
         libererAVL(racine);
     }
 
- 
     // MODE LEAKS : GRAPHE DE DISTRIBUTION
-    
+
     else if (strcmp(commande, "leaks") == 0)
     {
 
@@ -212,7 +219,6 @@ int main(int argc, char *argv[])
 
         // --- CALCUL ET ÉCRITURE ---
 
-        // Ouverture en mode 'append' (ajout)
         FILE *f_leaks = fopen("leaks.dat", "a");
         if (f_leaks == NULL)
         {
@@ -229,25 +235,22 @@ int main(int argc, char *argv[])
 
         if (usine_trouvee == 0)
         {
-            // Usine introuvable -> -1
             fprintf(f_leaks, "%s;-1\n", target_id);
             printf("Usine %s introuvable ou sans données.\n", target_id);
         }
         else
         {
-            // Lancement du calcul récursif
             Station *start_node = rechercherStation(index, target_id);
-            // Si le noeud de départ n'est pas dans le graphe (pas de sortie), fuites = 0 sur le réseau aval
             double total_pertes = 0.0;
             if (start_node != NULL)
             {
                 total_pertes = calculerFuites(start_node, volume_initial_usine);
             }
 
-            // Écriture du résultat
             fprintf(f_leaks, "%s;%.3f\n", target_id, total_pertes);
             printf("Usine : %s | Volume Init : %.2f | Pertes Totales : %.2f\n",
-                   target_id, volume_initial_usine, total_pertes);}
+                   target_id, volume_initial_usine, total_pertes);
+        }
 
         fclose(f_leaks);
         libererGraphe(index);
@@ -255,6 +258,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-    
-    
