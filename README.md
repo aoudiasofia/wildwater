@@ -40,7 +40,6 @@ Le projet se divise en deux modules principaux :
 ├── src/
 │   ├── main.c           # Point d'entrée, parsing CSV et logique prncipale
     ├── avl.c
-
     ├── leaks.c
 ├── headers/
 │   └── wildwater.h      # Prototypes et structures (Station, Liaison, AVL)
