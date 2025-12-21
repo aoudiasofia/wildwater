@@ -103,7 +103,7 @@ open histo_max_high.png
 
 ---
 
-## ⚠️ Notes et bonnes pratiques
+## ⚠️ Notes
 
 - Vérifier que `gnuplot` est installé et accessible dans le `PATH` : `command -v gnuplot`.
 - `client.sh` vérifie la présence de gnuplot ; sans gnuplot aucun PNG ne sera produit.
