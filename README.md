@@ -5,6 +5,19 @@ Ce projet permet d'analyser un réseau de distribution d'eau, de générer des h
 
 ---
 
+## ⚠️ INSTALLATION : FICHIER DE DONNÉES REQUIS
+
+**Pour que le projet fonctionne correctement, l'utilisation du fichier de données complet est obligatoire.**
+
+Le fichier `c-wildwater_v0.dat` inclus par défaut n'est qu'un **échantillon de test** (3 usines).
+
+👉 **Action requise avant de commencer :**
+
+1. Téléchargez le fichier **`c-wildwater_v3.dat`** (fichier volumineux fourni dans le sujet).
+2. Placez ce fichier **à la racine du projet** (au même niveau que le `Makefile` et `client.sh`).
+
+---
+
 ## 🤝 L'Équipe
 
 Projet réalisé par :
